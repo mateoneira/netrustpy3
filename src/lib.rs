@@ -8,8 +8,9 @@ use pyo3::wrap_pyfunction;
 #[pymodule]
 fn netrustpy3(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<graph::Graph>()?;
+    m.add_class::<algorithms::bfs::BfsTree>()?;
     m.add_function(wrap_pyfunction!(dfs, m)?)?;
     m.add_function(wrap_pyfunction!(bfs, m)?)?;
-    m.add_function(wrap_pyfunction!(single_source_dijkstra, m)?);
+    m.add_function(wrap_pyfunction!(single_source_dijkstra, m)?)?;
     Ok(())
 }

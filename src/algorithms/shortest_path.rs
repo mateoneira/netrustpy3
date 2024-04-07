@@ -29,9 +29,9 @@ pub fn single_source_dijkstra(graph: &Graph, src: usize) -> HashMap<usize, (f32,
             (
                 node,
                 if node == src {
-                    (0f32, vec![])
+                    (0f32, vec![src])
                 } else {
-                    (INFINITY, vec![])
+                    (INFINITY, vec![src])
                 },
             )
         })

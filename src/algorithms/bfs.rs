@@ -2,16 +2,32 @@ use crate::graph::Graph;
 use pyo3::prelude::*;
 use std::collections::{HashMap, HashSet, VecDeque};
 
+#[pyclass]
 pub struct BfsNode {
     pub parent: Option<usize>,
     pub distance: usize,
 }
+
+///implement clone for BfsNode
+/// This is necessary to return a copy of the node
+/// when calling the get method of the BfsTree class
+impl Clone for BfsNode {
+    fn clone(&self) -> Self {
+        BfsNode {
+            parent: self.parent,
+            distance: self.distance,
+        }
+    }
+}
+
 #[pyclass]
 pub struct BfsTree {
     pub nodes: HashMap<usize, BfsNode>,
 }
 
+#[pymethods]
 impl BfsTree {
+    #[new]
     pub fn new() -> Self {
         BfsTree {
             nodes: HashMap::new(),
@@ -26,27 +42,32 @@ impl BfsTree {
         self.nodes.insert(key, node);
     }
 
-    pub fn get(&self, key: &usize) -> Option<&BfsNode> {
-        self.nodes.get(key)
+    pub fn get(&self, key: usize) -> Option<BfsNode> {
+        if let Some(node) = self.nodes.get(&key) {
+            Some(node.clone())
+        } else {
+            None
+        }
     }
 
     pub fn get_distance(&self, target: usize) -> usize {
-        self.get(&target).unwrap().distance
+        self.get(target).unwrap().distance
     }
 
     pub fn get_path(&self, target: usize) -> Vec<usize> {
         let mut path: Vec<usize> = Vec::new();
         path.push(target);
 
-        let mut current = self.get(&target).unwrap();
+        let mut current = self.get(target).unwrap();
         while let Some(node) = current.parent {
             path.push(node);
-            current = self.get(&node).unwrap();
+            current = self.get(node).unwrap();
         }
         path.reverse();
         path
     }
 }
+
 #[pyfunction]
 pub fn bfs(graph: &Graph, source: usize) -> BfsTree {
     //! Breadth-first search algorithm
@@ -70,7 +91,7 @@ pub fn bfs(graph: &Graph, source: usize) -> BfsTree {
                 if !visited.contains(&neighbour) {
                     bfs_tree.insert(
                         *neighbour,
-                        (Some(current), bfs_tree.get(&current).unwrap().distance + 1),
+                        (Some(current), bfs_tree.get(current).unwrap().distance + 1),
                     );
                     visited.insert(*neighbour);
                     queue.push_back(*neighbour)
